@@ -1,0 +1,67 @@
+class BooleanExpression:
+    def __init__(self, expression):
+        # Initialize the BooleanExpression object with the given expression and an empty dictionary of variables
+        self.expression = expression
+        self.variables = {}
+
+    def evaluate(self):
+        try:
+            # Try to evaluate the expression using the eval_expression method
+            return self.eval_expression(self.expression)
+        except KeyError:
+            # If an invalid variable is used in the expression, print an error message and return True
+            print("Error: Invalid boolean expression")
+            return False
+
+    def eval_expression(self, expression):
+        if expression[0] == '!':
+            # Handle negation by recursively calling eval_expression on the remaining part of the expression
+            return not self.eval_expression(expression[1:])
+        elif expression[0] == '(':
+            # Handle parentheses by recursively calling eval_expression on the contents of the parentheses
+            return self.eval_expression(expression[1:-1])
+        elif expression in ['T', 'F']:
+            # Handle the 'T' and 'F' constants by returning True or False, respectively
+            return expression == 'T'
+        else:
+            # Handle variables by returning their value from the variables dictionary
+            return self.variables[expression]
+
+    def set_variable(self, name, value):
+        # Set the value of a variable in the variables dictionary
+        self.variables[name] = value
+
+
+def main():
+    while True:
+        # Prompt the user to input a boolean expression
+        expression = input("λ> ")
+        if expression == 'exit':
+            # If the user enters 'exit', break the loop and exit the program
+            break
+
+        if expression.startswith("let "):
+            # If the input starts with 'let', set the value of a variable
+            parts = expression.split("=")
+            name = parts[0][4:].strip()
+            value = parts[1].strip()
+            if value in ['T', 'F']:
+                # If the value is 'T' or 'F', create a new BooleanExpression object and set the variable to True or False, respectively
+                b = BooleanExpression("")
+                b.set_variable(name, value == 'T')
+                print("{}: {}".format(name, value))
+            else:
+                # If the value is a boolean expression, create a new BooleanExpression object, evaluate it, and set the variable to the result
+                b = BooleanExpression(value)
+                b.set_variable(name, b.evaluate())
+                print("{}: {}".format(name, b.variables[name]))
+        else:
+            # If the input is not 'let', create a new BooleanExpression object, evaluate it, and print the result
+            b = BooleanExpression(expression)
+            result = b.evaluate()
+            print(result)
+
+
+if __name__ == '__main__':
+    # Call the main function when the script is run
+    main()
